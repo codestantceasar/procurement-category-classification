@@ -227,7 +227,7 @@ If the long-term objective expands to procurement risk analysis, redesign the ta
 ## 9. Project Links
 
 - **GitHub repository:** https://github.com/codestantceasar/procurement-category-classification
-- **Google Drive folder:** Add the verified link after creating the folder and checking its sharing permissions.
+- **Google Drive folder:** (https://drive.google.com/drive/folders/1C9SDAONbkn1q8jsD46kfcOtxBLrSrO3X?usp=drive_link)
 - **Presentation video:** Add the link after recording and uploading the presentation.
 
 ## 10. Acknowledgements
