@@ -4,35 +4,36 @@
 
 **Author:** Constantine Akas  
 **Institution:** African Leadership University  
-**Project type:** Machine Learning and Deep Learning Classification
+**Project type:** Machine Learning and Deep Learning Classification  
+**Task:** Multiclass Text Classification
 
 ## 1. Project Overview
 
-Public procurement is an important part of government operations because it supports the acquisition of goods, services, and infrastructure-related works. Organizing procurement information can help people analyze public purchasing activities and understand how procurement opportunities are distributed across categories.
+Public procurement supports the acquisition of goods, services, and infrastructure-related works. Organizing procurement information can help people search, analyze, and understand large collections of public purchasing notices.
 
-This project develops and evaluates machine learning models that classify World Bank procurement notices using their textual bid descriptions. It compares traditional machine learning algorithms with a TensorFlow/Keras deep learning model to investigate how effectively different approaches predict the recorded procurement category.
+This project develops and evaluates machine learning models that predict the recorded procurement category of World Bank procurement notices using their textual bid descriptions. It compares traditional machine learning approaches with a TensorFlow/Keras neural network to investigate their classification performance.
 
-The project aligns with my personal mission of contributing to stronger government institutions and infrastructure in Nigeria. It explores a practical application of machine learning to public procurement data. However, predicting procurement categories does not directly measure corruption, transparency, government effectiveness, or infrastructure quality.
+The project aligns with my personal mission of contributing to stronger government institutions and infrastructure in Nigeria. It explores how machine learning can help organize procurement information. However, predicting procurement categories does not directly measure corruption, transparency, government effectiveness, or infrastructure quality.
 
 ## 2. Problem Statement
 
-Procurement notices contain textual descriptions that provide information about the goods, works, or services being requested. Manually organizing large collections of notices can be time-consuming.
+Procurement notices contain textual descriptions of the goods, works, and services being requested. Automatically categorizing large collections of notices could support information retrieval, indexing, and quality-control workflows.
 
-The research question is:
+The main research question is:
 
-**How effectively can traditional machine learning and deep learning models predict procurement categories from the textual descriptions of World Bank procurement notices, and how well do the models perform on notices associated with Nigeria?**
+**How effectively can traditional machine learning and deep learning models predict procurement categories from World Bank procurement notice descriptions, and how do the models perform on notices associated with Nigeria?**
 
-This is a multiclass text-classification problem.
+This is a four-class text-classification problem.
 
 ## 3. Dataset
 
 The project uses the World Bank Procurement Notice dataset.
 
 - **Source:** [World Bank Procurement Notice dataset](https://financesone.worldbank.org/d/DS00979)
-- **Input feature:** Bid description text
+- **Input feature:** Procurement notice bid-description text
 - **Target variable:** Recorded procurement category
 - **Classification task:** Four-class prediction
-- **Geographic analysis:** Worldwide evaluation and a separate evaluation on Nigerian records
+- **Geographic analysis:** Worldwide evaluation and a separate evaluation of Nigerian records
 
 The four target classes are:
 
@@ -41,19 +42,32 @@ The four target classes are:
 3. Non-consulting Services
 4. Works
 
-The raw dataset contains more than 20,000 records, meeting the assignment's minimum dataset-size requirement. Records are filtered and prepared for modeling as documented in the notebook.
+### Dataset preparation
 
-The dataset represents recorded procurement notices, and its labels reflect the categories in the source data. Model predictions should therefore be interpreted as category predictions, not independent assessments of procurement quality or integrity.
+The original dataset contained **421,584 records**. After data cleaning and preparation, **384,722 records** remained for the modeling workflow.
+
+The cleaned dataset contains notices from all four target categories. The classes are imbalanced, with Non-consulting Services being the least represented category.
+
+The data was divided into training, validation, and test sets using project-grouped splitting. This approach helps prevent notices associated with the same project from appearing across multiple partitions.
+
+| Dataset partition | Records |
+|---|---:|
+| Training | 276,855 |
+| Validation | 47,985 |
+| Test | 59,882 |
+| **Total** | **384,722** |
+
+The target labels reflect the categories recorded in the source data. Model predictions should therefore be interpreted as category predictions, not independent assessments of procurement quality or integrity.
 
 ## 4. Methodology
 
 ### 4.1 Data preprocessing and feature engineering
 
-The project prepares bid descriptions for text classification using TF-IDF (Term Frequency–Inverse Document Frequency). TF-IDF represents text numerically based on the importance of words and phrases within the dataset.
+The traditional machine learning pipeline uses Term Frequency–Inverse Document Frequency (TF-IDF) to convert notice descriptions into numerical text features.
 
-The traditional machine learning experiments compare unigram features with unigram-and-bigram features. The preprocessing configuration includes a minimum document frequency, a maximum feature limit, sublinear term-frequency scaling, lowercasing, and accent stripping.
+The experiments investigate unigram and unigram-plus-bigram representations. The preprocessing configuration includes lowercasing, accent stripping, sublinear term-frequency scaling, minimum document frequency, and a maximum feature limit.
 
-Data splitting is performed by project group to reduce leakage between records belonging to the same project. The worldwide test set is kept separate from the training and validation sets for final evaluation.
+Project-grouped splitting is used to reduce the risk of data leakage between notices associated with the same project. The held-out test set is reserved for final model evaluation.
 
 ### 4.2 Traditional machine learning
 
@@ -64,87 +78,160 @@ The notebook evaluates the following approaches:
 - Multinomial Naive Bayes
 - Linear Support Vector Machine (SVM)
 
-Experiments investigate text-feature settings and class weighting. Class weighting is particularly relevant because the four procurement categories are not equally represented.
+The experiments compare text-feature configurations and investigate class weighting. Class weighting is relevant because the four procurement categories are not equally represented.
 
 ### 4.3 Deep learning
 
-A neural text-classification model is implemented with TensorFlow/Keras. The architecture uses an embedding layer, SpatialDropout1D, GlobalAveragePooling1D, a regularized dense layer, dropout, and a four-class softmax output.
+A neural text-classification model is implemented using TensorFlow/Keras. The architecture includes:
 
-The notebook also explores regularization and early stopping to reduce overfitting and improve generalization. The input pipeline uses TensorFlow data-processing tools as documented in the notebook.
+- Text input and an embedding layer
+- SpatialDropout1D
+- GlobalAveragePooling1D
+- A regularized dense layer
+- Dropout
+- A four-class softmax output layer
 
-### 4.4 Evaluation
+The notebook also investigates regularization and early stopping to improve generalization and reduce overfitting.
 
-The models are assessed using:
+Training and validation accuracy and loss curves are used to examine the learning behavior of the neural network.
+
+### 4.4 Evaluation metrics
+
+The models are evaluated using:
 
 - Accuracy
 - Macro F1-score
 - Weighted F1-score
 - Per-class precision, recall, and F1-score
 - Confusion matrices
-- One-vs-rest ROC-AUC
-- Training and validation learning curves where applicable
+- One-versus-rest ROC-AUC
+- Training and validation learning curves
 
-Macro F1 gives equal weight to each class, while weighted F1 accounts for the number of records in each class. Reporting both helps reveal performance differences that overall accuracy may hide.
+Macro F1 gives equal weight to each class, while weighted F1 accounts for the number of examples in each class. Reporting both helps reveal differences that overall accuracy may hide.
 
 ## 5. Results
 
-The following are the recorded worldwide test-set results from the notebook.
+### 5.1 Worldwide held-out test results
 
-| Model | Accuracy | Macro F1 | Weighted F1 |
-|---|---:|---:|---:|
-| Logistic Regression | 90.21% | 85.18% | 90.22% |
-| Linear SVM | 90.79% | 84.92% | 90.46% |
-| Regularized neural network | 88.27% | 83.25% | 88.65% |
+The following table summarizes the recorded worldwide held-out test results.
 
-Among these experiments, Linear SVM achieved the highest accuracy and weighted F1-score. Logistic Regression achieved the highest macro F1-score. The regularized neural network did not outperform the strongest traditional models on these three metrics.
+| Model | Accuracy | Macro F1 | Weighted F1 | Macro ROC-AUC (OvR) | Weighted ROC-AUC (OvR) |
+|---|---:|---:|---:|---:|---:|
+| Balanced TF-IDF + Logistic Regression | 90.23% | 85.19% | 90.24% | 0.9679 | 0.9823 |
+| TF-IDF + Linear SVM | 90.69% | 84.64% | 90.31% | 0.9630 | 0.9804 |
+| Regularized Keras neural network | 87.89% | 82.85% | 88.43% | 0.9600 | 0.9770 |
 
-The results also reveal a more difficult classification problem for Non-consulting Services, the least represented class. Its test-set F1-score was lower than those of the other three classes across all three models.
+Linear SVM achieved the highest recorded test accuracy and weighted F1-score. Logistic Regression achieved the highest macro F1-score and macro and weighted ROC-AUC among the three final models.
 
-A separate evaluation on Nigerian records provides an additional perspective on geographic performance. The notebook reports lower overall and macro F1 scores for Nigerian records than for the worldwide test set. This difference motivates further investigation into class distribution, textual patterns, and geographic generalization.
+The neural network performed below the two traditional models on the reported test metrics. These findings indicate that TF-IDF representations combined with linear classifiers were effective for this dataset and experimental configuration. They do not establish that traditional models will always outperform neural networks.
 
-These results are specific to the recorded dataset, preprocessing choices, model configurations, and evaluation splits. They do not establish that the models would perform equally well on all procurement systems or future notices.
+### 5.2 Category-level performance
+
+Non-consulting Services was the most difficult category to classify.
+
+In the recorded test classification report for the regularized neural network, this category achieved:
+
+- **Precision:** 0.50
+- **Recall:** 0.68
+- **F1-score:** 0.58
+
+By comparison, the neural network achieved F1-scores of 0.92 for Consultant Services, 0.91 for Goods, and 0.90 for Works.
+
+The results demonstrate why accuracy alone is insufficient for evaluating imbalanced multiclass problems. Differences in class representation, overlapping terminology, generic descriptions, and inconsistencies in recorded labels may contribute to the classification challenge.
+
+The class-weighting experiment also showed a precision–recall trade-off for Non-consulting Services. In the recorded validation comparison, recall increased from 0.52 to 0.74 while precision decreased from 0.80 to 0.63. Class weighting therefore changed the error profile rather than improving every metric simultaneously.
+
+### 5.3 Nigeria-specific evaluation
+
+A separate evaluation examined **2,707 held-out notices associated with Nigeria**.
+
+| Model | Evaluation set | Accuracy | Macro F1 |
+|---|---|---:|---:|
+| Logistic Regression | Worldwide test set | 90.23% | 85.19% |
+| Logistic Regression | Nigeria subset | 87.81% | 78.97% |
+| Linear SVM | Worldwide test set | 90.69% | 84.64% |
+| Linear SVM | Nigeria subset | 88.62% | 80.70% |
+
+Both traditional models recorded lower accuracy and macro F1 on the Nigerian subset than on the worldwide test set.
+
+Non-consulting Services remained challenging in the Nigeria-specific evaluation. Logistic Regression achieved precision of 0.35, recall of 0.71, and F1 of 0.47. Linear SVM achieved precision of 0.46, recall of 0.62, and F1 of 0.53.
+
+These results motivate further investigation into category distributions, vocabulary, notice templates, and other potential differences between geographic subsets. The evaluation does not establish why the performance gap occurred, and it should not be interpreted as evidence that Nigerian procurement is less transparent or more corrupt.
+
+### 5.4 Neural-network diagnostics
+
+The notebook includes training and validation learning curves to help assess the neural network's learning behavior.
+
+In the recorded initial experiment, training accuracy increased from 91.94% in the first epoch to 96.63% in the third epoch, while validation accuracy remained around 87.5–87.9% and validation loss increased from 0.3830 to 0.4291. This pattern is consistent with possible overfitting.
+
+The second neural-network experiment used a smaller architecture and additional regularization. It produced a modest improvement in validation macro F1. These results suggest that regularization helped to some extent but did not close the performance gap with the strongest traditional models.
+
+All reported results should be checked against the corresponding notebook outputs before final submission.
 
 ## 6. Repository Contents
 
-The repository contains the following project materials:
+The repository is intended to contain the following materials:
 
-- `submission_ready_review_cleaned.ipynb` — the documented notebook containing data preparation, experiments, evaluation, and result interpretation.
-- `README.md` — this project overview and documentation.
-- `requirements.txt` — the Python dependencies required to reproduce the experiments.
+- `README.md` — project overview, methodology, results, and reproduction instructions.
+- `requirements.txt` — Python dependencies for the project.
+- Jupyter notebook — data preparation, model experiments, evaluation, visualizations, and result interpretation.
 
-Additional files may be added as the project is finalized.
+Update the notebook filename listed here to match the actual file committed to the repository.
 
 ## 7. Reproducing the Project
 
-The notebook was developed for a Google Colab environment. To reproduce the experiments:
+The notebook was developed for Google Colab. To reproduce the experiments:
 
-1. Clone or download this repository.
+1. Clone or download the repository.
 2. Obtain the dataset from the linked World Bank source, subject to its access and licensing terms.
-3. Follow the data-loading instructions and file paths documented in the notebook.
-4. Install the dependencies listed in `requirements.txt`.
-5. Execute the notebook from beginning to end.
-6. Compare the newly generated metrics with the results documented in the notebook.
+3. Upload or make the dataset available in Google Colab.
+4. Follow the notebook's data-loading instructions and file paths.
+5. Install the dependencies listed in `requirements.txt`.
+6. Execute the notebook cells in order, including the neural-network training and learning-curve cells.
+7. Review the generated metrics, classification reports, confusion matrices, ROC curves, and learning curves.
+8. Compare the newly generated outputs with the results reported in this README.
 
-Exact reproduction may depend on the Python and library versions, available hardware, random seeds, and model-training settings.
+Exact reproduction may depend on Python and library versions, hardware, random seeds, data preparation, and model-training settings.
 
-The raw dataset is not included in this GitHub repository. The project dataset and saved model artifacts will be provided through the separate Google Drive folder required for the assignment.
+The raw dataset is not included in this repository. Dataset files and any required supporting artifacts are intended to be provided through a separate Google Drive folder for the assignment. Add the folder link once it has been created and its sharing permissions have been verified.
 
 ## 8. Limitations and Future Work
 
-The dataset contains imbalanced target classes, particularly Non-consulting Services. Consequently, overall accuracy alone does not adequately describe performance across all categories.
+Several limitations affect interpretation of the results.
 
-The recorded category is used as the target label, so the model learns patterns in existing descriptions and labels. It may reproduce inconsistencies in those records and may perform differently on notices from other regions, time periods, or procurement systems.
+First, the dataset consists of notices published through the World Bank system and is not necessarily representative of all procurement activities in Nigeria or worldwide.
 
-Future work could investigate additional text representations, more advanced language models, temporal validation, further analysis of errors in the underrepresented class, and evaluation on independently collected procurement records. Such work would be necessary before considering practical deployment.
+Second, the target is the category already recorded in the source data. The models may learn inconsistencies in existing labels rather than independently verified categories.
+
+Third, the input is limited to notice descriptions. The models do not directly assess complete tender documents, contract execution, procurement outcomes, or audit-confirmed irregularities.
+
+Fourth, the class imbalance makes Non-consulting Services harder to classify. Increasing recall through class weighting reduces precision, so model selection depends on the relative costs of missed cases and false alarms.
+
+Fifth, the Nigeria-specific subset is smaller than the worldwide test set and may have a different category distribution. The observed performance difference is descriptive and does not identify its cause.
+
+Finally, the reviewed notebook has not been executed end-to-end after editing. The displayed outputs are retained from earlier experiments, and a fresh run may produce different values depending on software versions, hardware, and training settings. A clean end-to-end run is necessary before claiming full reproducibility.
+
+Future work could include:
+
+1. Executing the notebook in a fresh Colab runtime and verifying all outputs.
+2. Recording software and dependency versions.
+3. Reporting class counts for each evaluation subset.
+4. Using repeated project-grouped splits or confidence intervals.
+5. Evaluating additional geographic subsets.
+6. Reviewing false positives and false negatives for Non-consulting Services.
+7. Investigating targeted data cleaning and alternative class-weighting strategies.
+8. Testing transformer-based text models if computational resources permit.
+
+If the long-term objective expands to procurement risk analysis, redesign the target around a clearly defined, independently validated risk indicator rather than treating category predictions as evidence of corruption.
 
 ## 9. Project Links
 
 - **GitHub repository:** https://github.com/codestantceasar/procurement-category-classification
-- **Google Drive folder:** To be added after the folder is created and sharing permissions are checked.
-- **Presentation video:** To be added after recording and uploading the presentation.
+- **Google Drive folder:** Add the verified link after creating the folder and checking its sharing permissions.
+- **Presentation video:** Add the link after recording and uploading the presentation.
 
 ## 10. Acknowledgements
 
-The project uses publicly sourced World Bank procurement data and open-source machine learning tools. Dataset attribution and applicable terms should be retained when redistributing or using the data.
+This project uses World Bank procurement data and open-source machine learning tools. Dataset attribution and applicable terms should be retained when redistributing or using the data.
 
-This project was developed as part of a machine learning course at African Leadership University.
+The project was developed as part of a machine learning course at African Leadership University.
